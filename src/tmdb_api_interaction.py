@@ -26,7 +26,6 @@ def request_from_tmdb(movie_id, directory, API_KEY):
 path = pathlib.Path(__file__).parent.absolute()
 ids_filename = path.parents[0] / "data/ml-25m/links.csv"
 ids_df = pd.read_csv(ids_filename, dtype=str)
-
 tmdb_id_list = list(ids_df['tmdbId'])
 rawdata_directory = path.parents[0] / "rawData/TMDB-metadata-62K/"
 
@@ -36,9 +35,11 @@ api_file = path.parents[0] / "src/tmdb_api_key.txt"
 API_KEY = api_file.read_text()
 #######################
 
+# Opens a guest session
 r = requests.get('https://api.themoviedb.org/3/authentication/guest_session/new?api_key=' + API_KEY)
 
-for movie_id in tqdm(tmdb_id_list[:10]):
+# For each movie, pull data if there is no file in the directory
+for movie_id in tqdm(tmdb_id_list):
     movie = movie_id + '.txt'
     filename = rawdata_directory / movie
     if not filename.exists():
