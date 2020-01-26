@@ -7,7 +7,6 @@ import pathlib
 
 def request_from_tmdb(movie_id, directory, API_KEY):
     """
-
     :param movie_id: Id of the movie requested from The Movie Database
     :param directory: directory where to save the data
     :param API_KEY: The Movie Database API key
