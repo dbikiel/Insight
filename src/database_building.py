@@ -1,9 +1,7 @@
 import pandas as pd
-import numpy as np
 import json
-import os.path
 import pathlib
-from tqdm import notebook, trange
+import tqdm as tqdm
 import unidecode
 
 # Function to convert json to list
@@ -83,6 +81,8 @@ def json_to_dict(filename, directory):
     res['producer'] = '|'.join(producer)
     res['writer'] = '|'.join(writer)
 
+    for key in res:
+        res[key] = unidecode.unidecode(str(res[key]))
     return res
 
 # Loading files
@@ -100,13 +100,9 @@ rawdata_directory = path.parents[0] / "rawData/TMDB-metadata-62K/"
 # Execute
 
 directory_TMDB = path.parents[0] / "rawData/TMDB-metadata-62K"
-movie = '710'
-res = json_to_dict(movie + '.txt', directory_TMDB)
-#df_overview = pd.DataFrame([json_to_dict(str(i)+ '.txt', directory_TMDB) for i in tmdbId_list])
-#df_overview['movieId'] = ids_df.movieId
-#df_overview
-
-for i in res:
-    print(unidecode.unidecode(str(res[i])))
+#res = json_to_dict(movie + '.txt', directory_TMDB)
+df_overview = pd.DataFrame([json_to_dict(str(i)+ '.txt', directory_TMDB) for i in tqdm(tmdb_id_list)])
+df_overview['movieId'] = ids_df.movieId
+df_overview.to_csv(path.parents[0] / "data/TMDB-metadata-62K.csv")
 
 
