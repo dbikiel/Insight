@@ -1,8 +1,9 @@
 import pandas as pd
 import json
 import pathlib
-import tqdm as tqdm
+from tqdm import tqdm
 import unidecode
+import re
 
 # Function to convert json to list
 def json_to_dict(filename, directory):
@@ -41,6 +42,27 @@ def json_to_dict(filename, directory):
     res['budget'] = r['budget']  # budget
     res['genres'] = '|'.join([i['name'] for i in r['genres']])  # genres
     res['overview'] = r['overview'].strip()
+
+    ####
+    # Special Characters
+    final_text = res['overview']
+    review_text = re.sub(r"[^A-Za-z0-9(),!.?\'`]", " ", final_text)
+    review_text = re.sub(r"\'s", " 's ", final_text)
+    review_text = re.sub(r"\'ve", " 've ", final_text)
+    review_text = re.sub(r"n\'t", " 't ", final_text)
+    review_text = re.sub(r"\'re", " 're ", final_text)
+    review_text = re.sub(r"\'d", " 'd ", final_text)
+    review_text = re.sub(r"\'ll", " 'll ", final_text)
+    review_text = re.sub(r",", " ", final_text)
+    review_text = re.sub(r"\.", " ", final_text)
+    review_text = re.sub(r"!", " ", final_text)
+    review_text = re.sub(r"\(", " ( ", final_text)
+    review_text = re.sub(r"\)", " ) ", final_text)
+    review_text = re.sub(r"\?", " ", final_text)
+    review_text = re.sub(r"\s{2,}", " ", final_text)
+    res['overview'] = review_text
+    #####
+
     res['popularity'] = r['popularity']
     res['revenue'] = r['revenue']
     res['vote_average'] = r['vote_average']
@@ -83,6 +105,7 @@ def json_to_dict(filename, directory):
 
     for key in res:
         res[key] = unidecode.unidecode(str(res[key]))
+
     return res
 
 # Loading files
@@ -101,8 +124,24 @@ rawdata_directory = path.parents[0] / "rawData/TMDB-metadata-62K/"
 
 directory_TMDB = path.parents[0] / "rawData/TMDB-metadata-62K"
 #res = json_to_dict(movie + '.txt', directory_TMDB)
-df_overview = pd.DataFrame([json_to_dict(str(i)+ '.txt', directory_TMDB) for i in tqdm(tmdb_id_list)])
-df_overview['movieId'] = ids_df.movieId
-df_overview.to_csv(path.parents[0] / "data/TMDB-metadata-62K.csv")
+#df_overview = pd.DataFrame([json_to_dict(str(i)+ '.txt', directory_TMDB) for i in tqdm(tmdb_id_list[:1000])])
+#df_overview['movieId'] = ids_df.movieId
+#df_overview.to_csv(path.parents[0] / "data/TMDB-metadata-62K.csv")
+#print(df_overview['overview'])
 
+import csv
 
+with open(path.parents[0] / "data/TMDB-metadata-62K.csv", mode='w') as file:
+    file_writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    header = False
+    for i in tqdm(tmdb_id_list):
+        tmp = json_to_dict(str(i) + '.txt', directory_TMDB)
+        if not header:
+            h = tmp.keys()
+            file_writer.writerow(h)
+            header = True
+        file_writer.writerow(tmp.values())
+#    employee_writer.writerow(['John Smith', 'Accounting', 'November'])
+#    employee_writer.writerow(['Erica Meyers', 'IT', 'March'])
+#
+#for i in tqdm(tmdb_id_list[:1000]):
