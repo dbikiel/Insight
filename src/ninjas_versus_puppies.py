@@ -3,17 +3,16 @@ import pandas as pd
 import numpy as np
 from gensim.models.doc2vec import Doc2Vec
 
-directory = '/Users/dbikiel/Documents/Insight-Local/notebooks/'
 
 #load model
-model = Doc2Vec.load(directory + 'model_doc2vec_20120123')
+model = Doc2Vec.load('../models/model_doc2vec_20120123')
+#print('Done!')
 
 #load data
-data = pd.read_csv(open(directory + 'movielens_62K_titles_overviews_summaries.csv'))
-over = pd.read_csv(open('/Users/dbikiel/PycharmProjects/Insight/data/TMDB-metadata-62K.csv'), encoding='utf-8')
+over = pd.read_csv('../data/TMDB-metadata-62K.csv')
 overview = over.overview
 
-title = pd.read_csv(directory + 'movie_title.csv')
+title = pd.read_csv('../data/movies.csv')
 movieId = title.movieId
 title = title.title
 
