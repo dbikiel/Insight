@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from gensim.models.doc2vec import Doc2Vec
+from search_similar_title import *
 
 
 #load model
@@ -24,15 +25,18 @@ def find_me_something(model, movieId, title, overview, words, topn = 500, movies
     word1 = words[0]
     word2 = words[1]
 
+
     # Search similarity
     if not movies:
         vec1 = model[word1]
         vec2 = model[word2]
     else:
-        titles_only = [i.split('(') for i in title]
-        titles_only = [i[0].strip() for i in titles_only]
-        movie1 = titles_only.index(word1)
-        movie2 = titles_only.index(word2)
+        #titles_only = [i.split('(') for i in title]
+        #titles_only = [i[0].strip() for i in titles_only]
+        #movie1 = titles_only.index(word1)
+        #movie2 = titles_only.index(word2)
+        movie1 = word1
+        movie2 = word2
         vec1 = model.docvecs[movie1]
         vec2 = model.docvecs[movie2]
 
@@ -77,22 +81,44 @@ def find_me_something(model, movieId, title, overview, words, topn = 500, movies
 
 st.title('Ninjas versus Puppies')
 selection = st.radio("Want titles or words?",('Movie Titles', 'Words'))
-word1 = st.text_input('What do you want to see?')
-word2 = st.text_input('And what do you want to see?')
-st.write('You want to see something with ', word1, ' and ', word2)
-st.write('Behold!')
+w1 = st.empty()
+w2 = st.empty()
+word1 = st.empty()
+word2 = st.empty()
+word1_list = st.empty()
+word2_list = st.empty()
+
 
 if selection == 'Words':
     movies = False
 else:
+
     movies = True
 
+    w1 = st.text_input('What do you want to see?')
+    res = search_similar_title(w1, title, 10)
+    ids1, word1_list = zip(*res)
+    word1 = st.selectbox('Please select:', word1_list)
+
+
+    w2 = st.text_input('And what do you want to see?')
+    res = search_similar_title(w2, title, 10)
+    ids2, word2_list = zip(*res)
+    word2 = st.selectbox('Please select:', word2_list)
+
+    st.write('You want to see something close to ', word1, ' and ', word2)
+
+    word1 = int(ids1[word1_list.index(word1)])
+    word2 = int(ids2[word2_list.index(word2)])
+    #print(word1)
+    #print(word2)
+
 try:
-    results = find_me_something(model, movieId, title, overview, [word1, word2], 10000, movies)
+    results = find_me_something(model, movieId, title, overview, [word1, word2], 5000, movies)
     res = pd.DataFrame(results)
     res = res.transpose()
-    final = res.sort_values(by=['mean_similarity'], ascending=False).head(10)
+    final = res.sort_values(by=['mean_similarity'], ascending=False).head(5)
     #final
-    st.table(final[['title', 'overview', 'mean_similarity', 'user1_sim','user2_sim']])
+    st.table(final[['title', 'overview', 'mean_similarity']])
 except:
     st.write('You want to see something different, maybe?')
