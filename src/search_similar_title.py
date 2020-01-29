@@ -11,7 +11,7 @@ def search_similar_title(pattern, titles, n_results, threshold=0.4):
     :return: list of potential titles
     """
     title_list = list(titles.values)
-    res = difflib.get_close_matches(pattern, title_list, 5, threshold)
+    res = difflib.get_close_matches(pattern, title_list, n_results, threshold)
     best = []
     for i in res:
         if i in title_list:

@@ -96,13 +96,13 @@ else:
     movies = True
 
     w1 = st.text_input('What do you want to see?')
-    res = search_similar_title(w1, title, 10)
+    res = search_similar_title(w1, title, 20)
     ids1, word1_list = zip(*res)
     word1 = st.selectbox('Please select:', word1_list)
 
 
     w2 = st.text_input('And what do you want to see?')
-    res = search_similar_title(w2, title, 10)
+    res = search_similar_title(w2, title, 20)
     ids2, word2_list = zip(*res)
     word2 = st.selectbox('Please select:', word2_list)
 
