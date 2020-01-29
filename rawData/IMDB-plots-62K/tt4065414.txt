@@ -1,0 +1,3 @@
+How a group of NSA code-breakers had a chance of preventing 9/11.
+A Good American tells the story of the best code-breaker the USA ever had and how he and a small team within NSA created a surveillance tool that could pick up any electronic signal on earth, filter it for targets and render results in real-time while keeping the privacy as demanded by the US constitution. The tool was perfect - except for one thing: it was way too cheap. Therefor NSA leadership, who had fallen into the hands of industry, dumped it - three weeks prior to 9/11. In a secret test-run of the program against the pre-9/11-NSA database in early 2002 the program immediately found the terrorists. This is the story of former Technical director of NSA, Bill Binney, and a program called ThinThread.
+

@@ -129,6 +129,3 @@ dmypy.json
 .pyre/
 /data/ml-25m/
 /src/tmdb_api_key.txt
-/rawData/IMDB-plots-62K/
-/rawData/TMDB-metadata-62K
-/rawdata

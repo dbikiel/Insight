@@ -1,0 +1,2 @@
+Adaptation of Russell Hoban's novel about two mechanical toy mice, and their quest to become "self-winding".
+

@@ -1,0 +1,2 @@
+Black and white rectangular images fade in and out of the screen. Their movement make them sometimes look like they're panning from side to side. Their movement also make the black and white individually change from foreground to background and visa versa.
+

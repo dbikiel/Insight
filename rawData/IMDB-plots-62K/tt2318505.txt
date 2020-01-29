@@ -1,0 +1,3 @@
+Director PES recreates five classic arcade games (Centipede, Frogger, Asteroids, Space Invaders, and Pac-Man) by manipulating familiar objects in stop-motion.
+Today, we take a trip down memory lane as we visit an old-fashioned arcade store crammed with our beloved and classic coin-operated games. Fancy a try with "Centipede", "Frogger" and "Pac-Man" or do you prefer a shooter like "Asteroids" and "Space Invaders"? The choice is yours.
+
