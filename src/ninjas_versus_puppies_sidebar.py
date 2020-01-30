@@ -16,9 +16,11 @@ warnings.filterwarnings("ignore")
 
 ####### helping functions #######
 
-def find_middle_with_filter(model, data_df, movieid_to_doctags, movies, topn=2000):
+def find_middle_with_filter(model, data_df, movieid_to_doctags, movies, topn, remove_movies):
     movie1 = int(movies[0])
     movie2 = int(movies[1])
+
+    to_remove = [int(remove_movies[0]), int(remove_movies[1])]
 
     # titles and movieIds from the dataframe
     title = list(data_df['title_year'])
@@ -46,11 +48,16 @@ def find_middle_with_filter(model, data_df, movieid_to_doctags, movies, topn=200
     INTERSECTION = set(vec1_sim_doctags).intersection(set(vec2_sim_doctags))
     INTERSECTION = INTERSECTION.intersection(vectors)
 
-    if movie1 in INTERSECTION:
-        INTERSECTION.remove(movie1)
+    if movieid_to_doctags[movie1] in INTERSECTION:
+        INTERSECTION.remove(movieid_to_doctags[movie1])
 
-    if movie2 in INTERSECTION:
-        INTERSECTION.remove(movie2)
+    if movieid_to_doctags[movie2] in INTERSECTION:
+        INTERSECTION.remove(movieid_to_doctags[movie2])
+
+    #print(remove_movies)
+    for movie in to_remove:
+        if movieid_to_doctags[movie] in INTERSECTION:
+            INTERSECTION.remove(movieid_to_doctags[movie])
 
     movie_id = []
     user1_sim = []
@@ -90,37 +97,37 @@ def find_middle_with_filter(model, data_df, movieid_to_doctags, movies, topn=200
     return list(final['id'])
 
 
-def make_slider_with_filter(model, data_df, movieid_to_doctags, movie_ini, movie_end, topn=2000):
+def make_slider_with_filter(model, data_df, movieid_to_doctags, movie_ini, movie_end, topn):
     movie_0 = movie_ini
     movie_8 = movie_end
+    top = topn
 
     # 4
-    # list_average = find_middle(model, title, movieId, [movie_0, movie_8], topn = topn)
-    list_average = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_8], topn=topn)
+    list_average = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_8], top, [movie_0, movie_8])
     movie_4 = random.choice(list_average)
 
     # 2
-    list_ninjas_1 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_4], topn=topn)
+    list_ninjas_1 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_4], top, [movie_0, movie_8])
     movie_2 = random.choice(list_ninjas_1)
 
     # 6
-    list_puppies_1 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_4, movie_8], topn=topn)
+    list_puppies_1 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_4, movie_8], top, [movie_0, movie_8])
     movie_6 = random.choice(list_puppies_1)
 
     # 1
-    list_ninjas_2 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_2], topn=topn)
+    list_ninjas_2 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_2], top, [movie_0, movie_8])
     movie_1 = random.choice(list_ninjas_2)
 
     # 5
-    list_puppies_2 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_4, movie_6], topn=topn)
+    list_puppies_2 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_4, movie_6], top, [movie_0, movie_8])
     movie_5 = random.choice(list_puppies_2)
 
     # 3
-    list_ninjas_3 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_2, movie_4], topn=topn)
+    list_ninjas_3 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_2, movie_4], top, [movie_0, movie_8])
     movie_3 = random.choice(list_ninjas_3)
 
     # 7
-    list_puppies_3 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_6, movie_8], topn=topn)
+    list_puppies_3 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_6, movie_8], top, [movie_0, movie_8])
     movie_7 = random.choice(list_puppies_3)
 
     # Return list of lists
@@ -182,7 +189,7 @@ if plot:
     #########
 
 
-@st.cache
+@st.cache(suppress_st_warning = True)
 def load_data():
     model1 = Doc2Vec.load('../models/model_doc2vec_20120123')
     full_df = pd.read_csv('../data/TMDB-metadata-62K.csv')
@@ -195,21 +202,26 @@ def load_data():
     return [model1, full_df, titles1]
 
 
+
 # load model and data
 model, data_df, titles = load_data()
 
 # Sidebar
 st.sidebar.markdown('What do you want to see?')
 
-#movie1 = st.sidebar.text_input('Choose movieId for 1:')
+w1_placeholder = st.empty()
+title1_placeholder = st.empty()
+w2_placeholder = st.empty()
+title2_placeholder = st.empty()
+
+#movie1
 w1 = st.sidebar.text_input('Choose your first movie!')
 res = search_similar_title(w1, data_df.title_year, 20)
 ids1, word1_list = zip(*res)
 title1 = st.sidebar.selectbox('Please select:', word1_list)
 movie1 = data_df[data_df['title_year'] == title1]['movieId']
 
-
-#movie2 = st.sidebar.text_input('Choose movieId for 2:')
+#movie2
 w2 = st.sidebar.text_input('Choose your second movie!')
 res = search_similar_title(w2, data_df.title_year, 20)
 ids2, word2_list = zip(*res)
@@ -218,10 +230,23 @@ movie2 = data_df[data_df['title_year'] == title2]['movieId']
 
 movieid_to_doctags = {movie: i for i, movie in enumerate(titles.movieId)}
 
+# Put original images on the top
+target_image_list = []
+for i in [list(movie1)[0], 'plus', list(movie2)[0]]:
+    if i == 'plus':
+        image = Image.open('../rawData/pictures/plus_icon.png')
+    else:
+        image = Image.open('../rawData/pictures/' + str(i) + '.jpg')
+    target_image_list.append(image)
+st.image(target_image_list)
+
+st.text('You may enjoy: ')
+
+
 min_average = st.sidebar.slider('Min Rating?', min_value=0.0, max_value=10.0, value=5.0, step=0.5, format=None, key = None)
 min_votes = st.sidebar.slider('Min Popularity?', min_value=0, max_value=1000, value=500, step=100, format=None, key = None)
 
-submit = st.sidebar.button('Submit')
+#submit = st.sidebar.button('Submit')
 res_value = st.sidebar.slider('More ninjas or puppies?', min_value=0, max_value=6, value=3, step=1, format=None, key = None)
 
 # if submit:
