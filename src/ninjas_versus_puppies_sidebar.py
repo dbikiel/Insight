@@ -141,7 +141,7 @@ def movie_filter(movies_df, min_votes=0, min_average=0):
     return movies_df[(movies_df.vote_average >= int(min_average)) & (movies_df.vote_count >= int(min_votes))]
 
 
-def search_similar_title(pattern, titles, n_results, threshold=0.4):
+def search_similar_title(pattern, titles, n_results, threshold=0.2):
     """
     Search closest title from pattern
     :param pattern: string or movie
@@ -162,6 +162,7 @@ def search_similar_title(pattern, titles, n_results, threshold=0.4):
 
 ##################################
 st.title('Ninjas versus Puppies')
+st.text('Ninjas versus Puppies is a tool to help couples find a movie that both can enjoy...')
 
 # We import seaborn to make nice plots.
 import seaborn as sns
@@ -170,26 +171,8 @@ sns.set_style('darkgrid')
 sns.set_palette('muted')
 sns.set_context("notebook", font_scale=1.5, rc={"lines.linewidth": 2.5})
 
-plot = st.sidebar.checkbox('Want to see the plot?', value=False, key=None)
 
-if plot:
-    ########
-    data_for_bokeh = pd.read_csv('../data/pds_data_df_62K.csv', sep='\t')
-    source = ColumnDataSource(data_for_bokeh)
-    TOOLTIPS = [("Title", "@title")]
-    plotting_movies = figure(title="Movies' space", tooltips=TOOLTIPS, plot_width=300, plot_height=300)
-    plotting_movies.circle('x_val', 'y_val', color='black', alpha=0.01, source=source)
-    plotting_movies.toolbar.logo = None
-    plotting_movies.toolbar_location = None
-    plotting_movies.xgrid.grid_line_color = None
-    plotting_movies.ygrid.grid_line_color = None
-    plotting_movies.axis.visible = False
-    st.bokeh_chart(plotting_movies)
-    # show(plotting_comments)
-    #########
-
-
-@st.cache(suppress_st_warning = True)
+@st.cache(suppress_st_warning = True,  allow_output_mutation = True)
 def load_data():
     model1 = Doc2Vec.load('../models/model_doc2vec_20120123')
     full_df = pd.read_csv('../data/TMDB-metadata-62K.csv')
@@ -200,7 +183,6 @@ def load_data():
     full_df = full_df[['movieId', 'title_year', 'overview', 'genres', 'vote_average', 'vote_count']]
 
     return [model1, full_df, titles1]
-
 
 
 # load model and data
@@ -215,15 +197,15 @@ w2_placeholder = st.empty()
 title2_placeholder = st.empty()
 
 #movie1
-w1 = st.sidebar.text_input('Choose your first movie!')
-res = search_similar_title(w1, data_df.title_year, 20)
+w1 = st.sidebar.text_input('Choose your first movie!', 'Dune (1984)')
+res = search_similar_title(w1, data_df.title_year, 50)
 ids1, word1_list = zip(*res)
 title1 = st.sidebar.selectbox('Please select:', word1_list)
 movie1 = data_df[data_df['title_year'] == title1]['movieId']
 
 #movie2
-w2 = st.sidebar.text_input('Choose your second movie!')
-res = search_similar_title(w2, data_df.title_year, 20)
+w2 = st.sidebar.text_input('Choose your second movie!',"William Shakespeare's Romeo + Juliet (1996) ")
+res = search_similar_title(w2, data_df.title_year, 50)
 ids2, word2_list = zip(*res)
 title2 = st.sidebar.selectbox('Please select:', word2_list)
 movie2 = data_df[data_df['title_year'] == title2]['movieId']
@@ -238,16 +220,17 @@ for i in [list(movie1)[0], 'plus', list(movie2)[0]]:
     else:
         image = Image.open('../rawData/pictures/' + str(i) + '.jpg')
     target_image_list.append(image)
-st.image(target_image_list)
+st.image(target_image_list, width = 200)
 
-st.text('You may enjoy: ')
-
+#st.text('You may enjoy: ')
+image = Image.open('../rawData/pictures/bracket.png')
+st.image(image, width = 620)
 
 min_average = st.sidebar.slider('Min Rating?', min_value=0.0, max_value=10.0, value=5.0, step=0.5, format=None, key = None)
 min_votes = st.sidebar.slider('Min Popularity?', min_value=0, max_value=1000, value=500, step=100, format=None, key = None)
 
 #submit = st.sidebar.button('Submit')
-res_value = st.sidebar.slider('More ninjas or puppies?', min_value=0, max_value=6, value=3, step=1, format=None, key = None)
+res_value = st.sidebar.slider('More like the first or the second movie?', min_value=0, max_value=6, value=3, step=1, format=None, key = None)
 
 # if submit:
 data = data_df.copy()
@@ -259,4 +242,33 @@ image_list = []
 for i in res[res_value]:
     image = Image.open('../rawData/pictures/' + str(i) + '.jpg')
     image_list.append(image)
-st.image(image_list)
+st.image(image_list, width = 200)
+
+#plot = st.sidebar.checkbox('Want to see the plot?', value=False, key=None)
+#
+#if plot:
+#    ########
+#    data_for_bokeh = pd.read_csv('../data/pds_data_df_62K.csv', sep='\t')
+#    source = ColumnDataSource(data_for_bokeh)
+#    TOOLTIPS = [("Title", "@title")]
+#    plotting_movies = figure(title="Movies' space", tooltips=TOOLTIPS, plot_width=800, plot_height=800)
+#    plotting_movies.circle('x_val', 'y_val', color='black', alpha=0.01, source=source)
+#    plotting_movies.toolbar.logo = None
+#    plotting_movies.toolbar_location = None
+#    plotting_movies.xgrid.grid_line_color = None
+#    plotting_movies.ygrid.grid_line_color = None
+#    plotting_movies.axis.visible = False
+#
+#    #Plot the movie points
+#    m1_in_bokeh = movieid_to_doctags[list(movie1)[0]]
+#    m2_in_bokeh = movieid_to_doctags[list(movie2)[0]]
+#    plotting_movies.circle(data_for_bokeh.loc[m1_in_bokeh].x_val, data_for_bokeh.loc[m1_in_bokeh].y_val, color='red', alpha=1, size = 20)
+#    plotting_movies.circle(data_for_bokeh.loc[m2_in_bokeh].x_val, data_for_bokeh.loc[m2_in_bokeh].y_val, color='red', alpha=1, size = 20)
+#
+#    for i in res[res_value]:
+#        plotting_movies.circle(data_for_bokeh.loc[movieid_to_doctags[i]].x_val, data_for_bokeh.loc[movieid_to_doctags[i]].y_val,
+#                               color='yellow', alpha=1, size=20)
+#
+#    # show(plotting_comments)
+#    st.bokeh_chart(plotting_movies)
+#    #########
