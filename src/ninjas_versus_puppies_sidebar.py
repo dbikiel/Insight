@@ -182,7 +182,7 @@ if plot:
     #########
 
 
-#@st.cache
+@st.cache
 def load_data():
     model1 = Doc2Vec.load('../models/model_doc2vec_20120123')
     full_df = pd.read_csv('../data/TMDB-metadata-62K.csv')
