@@ -104,31 +104,38 @@ def make_slider_with_filter(model, data_df, movieid_to_doctags, movie_ini, movie
 
     # 4
     list_average = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_8], top, [movie_0, movie_8])
-    movie_4 = random.choice(list_average)
+    #movie_4 = random.choice(list_average)
+    movie_4 = list_average[0]
 
     # 2
     list_ninjas_1 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_4], top, [movie_0, movie_8])
-    movie_2 = random.choice(list_ninjas_1)
+    #movie_2 = random.choice(list_ninjas_1)
+    movie_2 = list_ninjas_1[0]
 
     # 6
     list_puppies_1 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_4, movie_8], top, [movie_0, movie_8])
-    movie_6 = random.choice(list_puppies_1)
+    #movie_6 = random.choice(list_puppies_1)
+    movie_6 = list_puppies_1[0]
 
     # 1
     list_ninjas_2 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_2], top, [movie_0, movie_8])
-    movie_1 = random.choice(list_ninjas_2)
+    #movie_1 = random.choice(list_ninjas_2)
+    movie_1 = list_ninjas_2[0]
 
     # 5
     list_puppies_2 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_4, movie_6], top, [movie_0, movie_8])
-    movie_5 = random.choice(list_puppies_2)
+    #movie_5 = random.choice(list_puppies_2)
+    movie_5 = list_puppies_2[0]
 
     # 3
     list_ninjas_3 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_2, movie_4], top, [movie_0, movie_8])
-    movie_3 = random.choice(list_ninjas_3)
+    #movie_3 = random.choice(list_ninjas_3)
+    movie_3 = list_ninjas_3[0]
 
     # 7
     list_puppies_3 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_6, movie_8], top, [movie_0, movie_8])
-    movie_7 = random.choice(list_puppies_3)
+    #movie_7 = random.choice(list_puppies_3)
+    movie_7 = list_puppies_3[0]
 
     # Return list of lists
 
@@ -204,7 +211,7 @@ title1 = st.sidebar.selectbox('Please select:', word1_list)
 movie1 = data_df[data_df['title_year'] == title1]['movieId']
 
 #movie2
-w2 = st.sidebar.text_input('Choose your second movie!',"William Shakespeare's Romeo + Juliet (1996) ")
+w2 = st.sidebar.text_input('Choose your second movie!', "William Shakespeare's Romeo + Juliet (1996) ")
 res = search_similar_title(w2, data_df.title_year, 50)
 ids2, word2_list = zip(*res)
 title2 = st.sidebar.selectbox('Please select:', word2_list)
@@ -230,7 +237,7 @@ min_average = st.sidebar.slider('Min Rating?', min_value=0.0, max_value=10.0, va
 min_votes = st.sidebar.slider('Min Popularity?', min_value=0, max_value=1000, value=500, step=100, format=None, key = None)
 
 #submit = st.sidebar.button('Submit')
-res_value = st.sidebar.slider('More like the first or the second movie?', min_value=0, max_value=6, value=3, step=1, format=None, key = None)
+res_value = st.sidebar.slider('More like the first (0) or the second movie (6)?', min_value=0, max_value=6, value=3, step=1, format=None, key = None)
 
 # if submit:
 data = data_df.copy()
