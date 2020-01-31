@@ -91,7 +91,7 @@ def find_middle_with_filter(model, data_df, movieid_to_doctags, movies, topn, re
 
     res = pd.DataFrame(results)
     final = res.sort_values(by=['mean_ineq_sim'], ascending=False).head(6)
-    # print(final)
+    #print(final)
     # return  final[['id','title', 'mean_sim','ineq_sim','mean_ineq_sim']]
     # return list(final['id'])[0]
     return list(final['id'])
@@ -104,38 +104,40 @@ def make_slider_with_filter(model, data_df, movieid_to_doctags, movie_ini, movie
 
     # 4
     list_average = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_8], top, [movie_0, movie_8])
-    #movie_4 = random.choice(list_average)
-    movie_4 = list_average[0]
+    movie_4 = random.choice(list_average)
+    #movie_4 = list_average[0]
 
     # 2
     list_ninjas_1 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_4], top, [movie_0, movie_8])
-    #movie_2 = random.choice(list_ninjas_1)
-    movie_2 = list_ninjas_1[0]
+    movie_2 = random.choice(list_ninjas_1)
+    #movie_2 = list_ninjas_1[0]
 
     # 6
     list_puppies_1 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_4, movie_8], top, [movie_0, movie_8])
-    #movie_6 = random.choice(list_puppies_1)
-    movie_6 = list_puppies_1[0]
+    movie_6 = random.choice(list_puppies_1)
+    #movie_6 = list_puppies_1[0]
 
     # 1
     list_ninjas_2 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_2], top, [movie_0, movie_8])
-    #movie_1 = random.choice(list_ninjas_2)
-    movie_1 = list_ninjas_2[0]
-
-    # 5
-    list_puppies_2 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_4, movie_6], top, [movie_0, movie_8])
-    #movie_5 = random.choice(list_puppies_2)
-    movie_5 = list_puppies_2[0]
-
-    # 3
-    list_ninjas_3 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_2, movie_4], top, [movie_0, movie_8])
-    #movie_3 = random.choice(list_ninjas_3)
-    movie_3 = list_ninjas_3[0]
+    movie_1 = random.choice(list_ninjas_2)
+    #movie_1 = list_ninjas_2[0]
 
     # 7
     list_puppies_3 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_6, movie_8], top, [movie_0, movie_8])
-    #movie_7 = random.choice(list_puppies_3)
-    movie_7 = list_puppies_3[0]
+    movie_7 = random.choice(list_puppies_3)
+    #movie_7 = list_puppies_3[0]
+
+
+    # 5
+    list_puppies_2 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_4, movie_6], top, [movie_0, movie_8])
+    movie_5 = random.choice(list_puppies_2)
+    #movie_5 = list_puppies_2[0]
+
+    # 3
+    list_ninjas_3 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_2, movie_4], top, [movie_0, movie_8])
+    movie_3 = random.choice(list_ninjas_3)
+    #movie_3 = list_ninjas_3[0]
+
 
     # Return list of lists
 
@@ -148,7 +150,7 @@ def movie_filter(movies_df, min_votes=0, min_average=0):
     return movies_df[(movies_df.vote_average >= int(min_average)) & (movies_df.vote_count >= int(min_votes))]
 
 
-def search_similar_title(pattern, titles, n_results, threshold=0.2):
+def search_similar_title(pattern, titles, n_results, threshold=0.4):
     """
     Search closest title from pattern
     :param pattern: string or movie
@@ -225,7 +227,10 @@ for i in [list(movie1)[0], 'plus', list(movie2)[0]]:
     if i == 'plus':
         image = Image.open('../rawData/pictures/plus_icon.png')
     else:
-        image = Image.open('../rawData/pictures/' + str(i) + '.jpg')
+        try:
+            image = Image.open('../rawData/pictures/' + str(i) + '.jpg')
+        except:
+            image = Image.open('../rawData/pictures/blank.jpg')
     target_image_list.append(image)
 st.image(target_image_list, width = 200)
 
@@ -242,14 +247,27 @@ res_value = st.sidebar.slider('More like the first (0) or the second movie (6)?'
 # if submit:
 data = data_df.copy()
 popular_movies = movie_filter(data, min_votes, min_average)
-res = make_slider_with_filter(model, popular_movies, movieid_to_doctags, movie1, movie2, 5000)
+try:
+    res = make_slider_with_filter(model, popular_movies, movieid_to_doctags, movie1, movie2, 2000)
+except:
+    st.text('Maybe you need to reduce the minimum vote or the rating...')
 
-# Make the Images!
-image_list = []
-for i in res[res_value]:
-    image = Image.open('../rawData/pictures/' + str(i) + '.jpg')
-    image_list.append(image)
-st.image(image_list, width = 200)
+if len(res) > 0:
+    # Make the Images!
+    image_list = []
+    for i in res[res_value]:
+        try:
+            image = Image.open('../rawData/pictures/' + str(i) + '.jpg')
+        except:
+            image = Image.open('../rawData/pictures/blank.jpg')
+        image_list.append(image)
+    st.image(image_list, width = 200)
+
+    over = st.sidebar.checkbox('Want to see the overviews?', value=False, key=None)
+
+    if over:
+        st.table(data[data['movieId'].isin(res[res_value])][['title_year','overview','genres']])
+
 
 #plot = st.sidebar.checkbox('Want to see the plot?', value=False, key=None)
 #
