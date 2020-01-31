@@ -90,6 +90,7 @@ def find_middle_with_filter(model, data_df, movieid_to_doctags, movies, topn, re
                'prod_sim': prod_sim, 'mean_ineq_sim': mean_ineq_sim, 'std_over_mean_sim': std_over_mean_sim}
 
     res = pd.DataFrame(results)
+    #print(results)
     final = res.sort_values(by=['mean_ineq_sim'], ascending=False).head(6)
     #print(final)
     # return  final[['id','title', 'mean_sim','ineq_sim','mean_ineq_sim']]
@@ -106,7 +107,7 @@ def make_slider_with_filter(model, data_df, movieid_to_doctags, movie_ini, movie
     list_average = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_8], top, [movie_0, movie_8])
     movie_4 = random.choice(list_average)
     #movie_4 = list_average[0]
-
+    #print('ACA')
     # 2
     list_ninjas_1 = find_middle_with_filter(model, data_df, movieid_to_doctags, [movie_0, movie_4], top, [movie_0, movie_8])
     movie_2 = random.choice(list_ninjas_1)
@@ -171,7 +172,7 @@ def search_similar_title(pattern, titles, n_results, threshold=0.4):
 
 ##################################
 st.title('Ninjas versus Puppies')
-st.text('Ninjas versus Puppies is a tool to help couples find a movie that both can enjoy...')
+st.text("A couples' negotiation tool for movie selection")
 
 # We import seaborn to make nice plots.
 import seaborn as sns
@@ -198,25 +199,21 @@ def load_data():
 model, data_df, titles = load_data()
 
 # Sidebar
+#st.sidebar.image(Image.open('../rawData/pictures/ninjas_versus_puppies.png'))
 st.sidebar.markdown('What do you want to see?')
 
-w1_placeholder = st.empty()
-title1_placeholder = st.empty()
-w2_placeholder = st.empty()
-title2_placeholder = st.empty()
-
 #movie1
-w1 = st.sidebar.text_input('Choose your first movie!', 'Dune (1984)')
+w1 = st.sidebar.text_input('Choose your first movie!', 'Dune (1984)', key = 10)
 res = search_similar_title(w1, data_df.title_year, 50)
 ids1, word1_list = zip(*res)
-title1 = st.sidebar.selectbox('Please select:', word1_list)
+title1 = st.sidebar.selectbox('Please select:', word1_list, key = 11)
 movie1 = data_df[data_df['title_year'] == title1]['movieId']
 
 #movie2
-w2 = st.sidebar.text_input('Choose your second movie!', "William Shakespeare's Romeo + Juliet (1996) ")
+w2 = st.sidebar.text_input('Choose your second movie!', "Amelie (Fabuleux destin d'Amélie Poulain, Le) (2001)  ", key = 12)
 res = search_similar_title(w2, data_df.title_year, 50)
 ids2, word2_list = zip(*res)
-title2 = st.sidebar.selectbox('Please select:', word2_list)
+title2 = st.sidebar.selectbox('Please select:', word2_list, key = 13)
 movie2 = data_df[data_df['title_year'] == title2]['movieId']
 
 movieid_to_doctags = {movie: i for i, movie in enumerate(titles.movieId)}
@@ -269,31 +266,34 @@ if len(res) > 0:
         st.table(data[data['movieId'].isin(res[res_value])][['title_year','overview','genres']])
 
 
-#plot = st.sidebar.checkbox('Want to see the plot?', value=False, key=None)
-#
-#if plot:
-#    ########
-#    data_for_bokeh = pd.read_csv('../data/pds_data_df_62K.csv', sep='\t')
-#    source = ColumnDataSource(data_for_bokeh)
-#    TOOLTIPS = [("Title", "@title")]
-#    plotting_movies = figure(title="Movies' space", tooltips=TOOLTIPS, plot_width=800, plot_height=800)
-#    plotting_movies.circle('x_val', 'y_val', color='black', alpha=0.01, source=source)
-#    plotting_movies.toolbar.logo = None
-#    plotting_movies.toolbar_location = None
-#    plotting_movies.xgrid.grid_line_color = None
-#    plotting_movies.ygrid.grid_line_color = None
-#    plotting_movies.axis.visible = False
-#
-#    #Plot the movie points
-#    m1_in_bokeh = movieid_to_doctags[list(movie1)[0]]
-#    m2_in_bokeh = movieid_to_doctags[list(movie2)[0]]
-#    plotting_movies.circle(data_for_bokeh.loc[m1_in_bokeh].x_val, data_for_bokeh.loc[m1_in_bokeh].y_val, color='red', alpha=1, size = 20)
-#    plotting_movies.circle(data_for_bokeh.loc[m2_in_bokeh].x_val, data_for_bokeh.loc[m2_in_bokeh].y_val, color='red', alpha=1, size = 20)
-#
-#    for i in res[res_value]:
-#        plotting_movies.circle(data_for_bokeh.loc[movieid_to_doctags[i]].x_val, data_for_bokeh.loc[movieid_to_doctags[i]].y_val,
-#                               color='yellow', alpha=1, size=20)
-#
-#    # show(plotting_comments)
-#    st.bokeh_chart(plotting_movies)
-#    #########
+plot = st.sidebar.checkbox('Want to see the BERT embeddings?', value=False, key=None)
+
+if plot:
+   ########
+   data_for_bokeh = pd.read_csv('../data/pds_data_df_62K.csv', sep='\t')
+   source = ColumnDataSource(data_for_bokeh)
+   TOOLTIPS = [("Title", "@title")]
+   plotting_movies = figure(title="Movies' space", tooltips=TOOLTIPS, plot_width=800, plot_height=800)
+   plotting_movies.circle('x_val', 'y_val', color='blue', alpha=0.05, source=source)
+   plotting_movies.toolbar.logo = None
+   plotting_movies.toolbar_location = None
+   plotting_movies.xgrid.grid_line_color = None
+   plotting_movies.ygrid.grid_line_color = None
+   plotting_movies.axis.visible = False
+
+   #Plot the movie points
+   mark_movies = st.sidebar.checkbox('Want to mark the movies?', value=False, key=None)
+
+   if mark_movies:
+       m1_in_bokeh = movieid_to_doctags[list(movie1)[0]]
+       m2_in_bokeh = movieid_to_doctags[list(movie2)[0]]
+       plotting_movies.circle(data_for_bokeh.loc[m1_in_bokeh].x_val, data_for_bokeh.loc[m1_in_bokeh].y_val, color='green', alpha= 0.75, size = 15)
+       plotting_movies.circle(data_for_bokeh.loc[m2_in_bokeh].x_val, data_for_bokeh.loc[m2_in_bokeh].y_val, color='red', alpha= 0.75, size = 15)
+
+       for i in res[res_value]:
+           plotting_movies.circle(data_for_bokeh.loc[movieid_to_doctags[i]].x_val, data_for_bokeh.loc[movieid_to_doctags[i]].y_val,
+                                  color='yellow', alpha=0.75, size=15)
+
+   # show(plotting_comments)
+   st.bokeh_chart(plotting_movies)
+   #########
