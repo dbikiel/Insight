@@ -1,3 +1,0 @@
-A documentary focused on Stuxnet, a piece of self-replicating computer malware that the U.S. and Israel unleashed to destroy a key part of an Iranian nuclear facility, and which ultimately spread beyond its intended target.
-Documentary detailing claims of American/Israeli jointly developed malware Stuxnet being deployed not only to destroy Iranian enrichment centrifuges but also threaten attacks against Iranian civilian infrastructure. Adresses obvious potential blowback of this possibly being deployed against the US by Iran in retaliation.
-

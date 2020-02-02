@@ -1,9 +1,0 @@
-It looks like we don't have any Plot Summaries for this title yet. Be the first to contribute! Just click the "Edit page" button at the bottom of the page or learn more in the Plot Summary submission guide.
-Through eight episodes, director Jason Scott covers the 25 year history of the Dial-Up Bulletin Board System, a modem-connected computer system that let others connect to a computer over a phone line and leave messages and trade files. Containing 200 interviews, episodes mostly consist of elaborate montages of dozens of people composing a narrative.BAUD is an introduction to the start of the BBS.
-SYSOPS AND USERS is a montage of stories and thoughts on running BBSes.
-FIDONET covers the amateur network of computers called Fidonet.
-MAKE IT PAY covers the BBS Industry.
-ARTSCENE covers the ANSI art scene of the 1990s.
-HPAC covers Hacking and Phreaking BBSes.
-COMPRESSION discusses the ARC-ZIP battle of 1988.
-NO CARRIER discusses the "end" of the dial-up BBS.

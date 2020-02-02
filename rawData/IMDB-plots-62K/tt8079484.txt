@@ -1,2 +1,0 @@
-A look at why some predictions fail while others succeed at forecasting the future.
-

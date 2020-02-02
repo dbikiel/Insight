@@ -1,2 +1,0 @@
-An immaculate, vivid and breathtaking implementation of Swift's romanticism.
-

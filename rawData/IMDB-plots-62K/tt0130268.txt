@@ -1,2 +1,0 @@
-Experimental short in which sentences are formed by displaying one word at a time and at alternating speeds.
-

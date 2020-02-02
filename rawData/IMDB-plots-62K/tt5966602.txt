@@ -1,2 +1,0 @@
-When a factory is bound to close, a group of workers decides to take action against the owner.
-

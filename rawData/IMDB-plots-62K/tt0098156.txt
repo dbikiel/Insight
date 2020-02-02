@@ -1,2 +1,0 @@
-Robotic Officer Tactical Operation Research. A prototype robot intended for crime combat escapes from the development lab and goes on a killing rampage.
-
