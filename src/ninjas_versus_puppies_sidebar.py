@@ -221,6 +221,7 @@ def make_slider_with_filter(model, data_df, movieid_to_doctags, movie_ini, movie
            list_puppies_1, list_puppies_2, list_puppies_3]
     return res
 
+
 @st.cache(suppress_st_warning=True, allow_output_mutation=True, show_spinner=False)
 def movie_filter(movies_df, min_votes, min_average):
     """
@@ -336,6 +337,7 @@ def put_target_images(movie1, movie2):
     # return list of images
     return target_image_list
 
+
 @st.cache(suppress_st_warning=True, allow_output_mutation=True, show_spinner=False)
 def make_images(res, res_value):
     """
@@ -405,30 +407,38 @@ def two_random_movies(movies_df):
 
 
 ##################################
+
+#Title
 st.title('Ninjas versus Puppies')
 st.markdown("**_A negotiation and discovering tool for movie selection_**")
 
-st.header(' ')
 # load model and data
 model, data_df, titles = load_data()
 movieid_to_doctags, movieid_to_title = make_dicts(titles)
 
+
+# Sidebar title and page selector
 st.sidebar.title('Ninjas versus Puppies')
 st.sidebar.markdown('What do you want to do?')
 pager = st.sidebar.radio('', ['Discover', 'Play', 'About'], index=0, key=None)
 
+# Discover page
 if pager == 'Discover':
+
     # Sidebar
     # st.sidebar.image(Image.open('../rawData/pictures/ninjas_versus_puppies.png'))
+    st.markdown('Ninjas versus Puppies uses overviews, plot summaries and synopsis to discover relationship between movies.')
     st.sidebar.markdown('Discover allows you to discover relationships between two movies...')
-    # movie1
+    st.header('Your selection is:')
+
+    # Movie 1 selection
     w1 = st.sidebar.text_input('Choose your first movie!', 'Dune (1984)', key=10)
     res1 = search_similar_title(w1, data_df.title_year, 50)
     ids1, word1_list = zip(*res1)
     title1 = st.sidebar.selectbox('Please select:', word1_list, key=11, index=22)
     movie1 = data_df[data_df['title_year'] == title1]['movieId']
 
-    # movie2
+    # Movie2 selection
     w2 = st.sidebar.text_input('Choose your second movie!', "Amelie (Fabuleux destin d'Amélie Poulain, Le) (2001)",
                                key=12)
     res2 = search_similar_title(w2, data_df.title_year, 50)
@@ -450,20 +460,23 @@ if pager == 'Discover':
     res_value = st.sidebar.slider('More like the first (0) or the second movie (6)?', min_value=0, max_value=6, value=3,
                                   step=1, format=None, key=None)
 
+    # Create a copy of the data
     data = data_df.copy()
+
+    # Filter by the slider values
     popular_movies = movie_filter(data, min_votes, min_average)
 
+    # Create the slider movies and images
     try:
         res = make_slider_with_filter(model, popular_movies, movieid_to_doctags, movie1, movie2, 2000)
     except:
         res = []
         st.text('Maybe you need to reduce the minimum vote or the rating...')
 
+    # If something found...
     if len(res) > 0:
-        # st.text('You may enjoy: ')
         image = Image.open('../rawData/pictures/bracket.png')
         st.image(image, width=620)
-
         image_list = make_images(res, res_value)
         caption_list = [movieid_to_title[i] for i in res[res_value]]
         st.image(image_list, width=200, caption = caption_list)
@@ -471,18 +484,15 @@ if pager == 'Discover':
         # Overview of the movies
         over = st.sidebar.checkbox('Want to see the overviews?', value=False, key=None)
 
+        # Show the overviews if selected
         if over:
             st.table(data[data['movieId'].isin(res[res_value])][['title_year', 'overview', 'genres']])
 
-        # Radio button to search similar movies
-        # print(res[0])
+        # Radio button to search similar movies to the found ones
         movies_list = [movieid_to_title[i] for i in res[res_value]]
         radio_selection = st.radio('Interested in similar movies to this one?', movies_list, index=0)
-
         movie_to_display = res[res_value][movies_list.index(radio_selection)]
-
         show_similar = st.button('Yes!', key=69)
-
         if show_similar:
             res2 = find_middle_with_filter(model, popular_movies, movieid_to_doctags,
                                            [movie_to_display, movie_to_display], 10,
@@ -493,21 +503,11 @@ if pager == 'Discover':
                 image_list2 = make_images(res2, None)
                 st.image(image_list2, width=200)
 
-#                image_list = []
-#                for i in res2:
-#                    try:
-#                        image = Image.open('../rawData/pictures/' + str(i) + '.jpg')
-#                    except:
-#                        image = Image.open('../rawData/pictures/blank.jpg')
-#                    image_list.append(image)
-#                st.image(image_list, width=200)
 
-#    plot = st.sidebar.checkbox('Want to see the BERT embeddings?', value=False, key=None)
-
-#    if plot:
-#        plot_bokeh(movie1, movie2, res, res_value)
-
+# Play mode
 elif pager == 'Play':
+
+    #title and sidebar selectors
     st.sidebar.markdown('Can you guess relationships between movies?')
     st.sidebar.markdown("Select a minimum rating and popularity for your movies and try to guess between two pairs before the times end!")
     min_average2 = st.sidebar.slider('Min Rating?', min_value=0.0, max_value=10.0, value=5.0, step=0.5, format=None,
@@ -515,33 +515,38 @@ elif pager == 'Play':
     min_votes2 = st.sidebar.slider('Min Popularity?', min_value=0, max_value=10000, value=500, step=10, format=None,
                                    key=None)
 
+    # Create a copy of the data
     data2 = data_df.copy()
+
+    # Filter data
     popular_movies_play = movie_filter(data2, min_votes2, min_average2)
 
+    # Launch the guessing game
     play_button = st.sidebar.button('Play!')
-
     if play_button:
         st.subheader('Guess which two movies are related to these ones:')
+
+        # select two pairs of movies randomly
         movies_play = two_random_movies(popular_movies_play)
         pairs = [(i, j) for i, j in zip(list(movies_play.movieId)[0::2], list(movies_play.movieId)[1::2])]
+
+        # Select one pair
         correct_ones = pairs[0]
+
+        # Create the images for the middle of the selected pair and make the images
         res3 = find_middle_with_filter(model, popular_movies_play, movieid_to_doctags, correct_ones, 2000, correct_ones)
         image_list = make_images(res3, None)
         caption_list = [movieid_to_title[i] for i in res3]
         st.image(image_list, width=200, caption=caption_list)
 
-        #st.text('Choose:')
+        # Randomized the pairs and show the options
         random.shuffle(pairs)
         for i, pair in enumerate(pairs):
             target_image_list = put_target_images([pair[0]], [pair[1]])
             st.header(['A', 'B'][i])
             st.image(target_image_list, width = 200, caption = [ movieid_to_title[pair[0]], '', movieid_to_title[pair[1]]] )
-        # correct_movies = st.radio('', ['A', 'B'], index=0, key=None)
 
-        # print(correct_ones)
-        # print(pairs)
-        # print(pairs.index(correct_ones))
-
+        # Makes a progress bar as timing. When ends show the result
         progress_bar = st.progress(0)
         for i in range(100):
             # Update progress bar.
@@ -549,14 +554,18 @@ elif pager == 'Play':
             time.sleep(0.2)
         st.header('The solution is ' + 'AB'[pairs.index(correct_ones)])
 
-
+# About page
 elif pager == 'About':
+
+    # Title and plot button
     st.sidebar.markdown('Ninja versus Puppies is powered by DOC2VEC')
     st.markdown('More than 62K movies overviews, plots and synopsis have been converted to vectors '
             'using the DOC2VEC algorithm. Similarity between movies is computed by measuring the cosine'
             ' similarity of their vectors. In addition, the BERT embedding of the overviews was used to build '
             'the representation below. See if you can find your favourite movies!')
     plot_it = st.sidebar.button('Plot!')
+
+    # plot the embeddings
     if plot_it:
         plotting_movies = plot_bokeh()
         st.bokeh_chart(plotting_movies)
