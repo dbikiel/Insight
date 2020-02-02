@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 /data/ml-25m/
 /src/tmdb_api_key.txt
+/rawData
