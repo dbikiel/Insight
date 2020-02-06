@@ -135,9 +135,28 @@ def find_middle_with_filter(model, data_df, movieid_to_doctags, movies, topn, re
 
     # produces the final result, sorting by mean - abs. Only first 6 results
     final = res.sort_values(by=['mean_ineq_sim'], ascending=False).head(6)
-
+    print(final[['user1_sim','user2_sim']])
     # returns a list of movie ids
     return list(final['id'])
+
+
+@st.cache(suppress_st_warning=True, allow_output_mutation=True, show_spinner=False)
+def movie_similarity(model, movieid_to_doctags, movies):
+    """
+    Function to calculate similarity between movies
+    :param model: a doc2vec model
+    :param movieid_to_doctags: dict to transform movie id to doctag id
+    :param movies: list of id of 2 movies
+    :return: similarity
+    """
+
+    # get the ids from the list
+    movie1 = int(movies[0])
+    movie2 = int(movies[1])
+
+    sim = model.docvecs.similarity(movieid_to_doctags[movie1], movieid_to_doctags[movie2])
+    return sim
+
 
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True, show_spinner=False)
@@ -369,7 +388,7 @@ def make_images(res, res_value):
 def load_data():
     """
     Loads the model and the dataframe with the data
-    :return:
+    :return: dataframes and model
     """
     model1 = Doc2Vec.load('../models/model_doc2vec_20120123')
     full_df = pd.read_csv('../data/TMDB-metadata-62K.csv')
@@ -386,8 +405,8 @@ def load_data():
 def make_dicts(titles):
     """
     Make dicts to transform ids to titles and doctags
-    :param titles:
-    :return:
+    :param titles: make dictionaries to convert from movie id to doctags and titles
+    :return: dicts
     """
     movieid_to_doctags = {movie: i for i, movie in enumerate(titles.movieId)}
     movieid_to_title = {i: title for i, title in zip(titles.movieId, titles.title)}
@@ -398,8 +417,8 @@ def make_dicts(titles):
 def two_random_movies(movies_df):
     """
     Select 2 pairs of movies randomly for playing
-    :param movies_df:
-    :return:
+    :param movies_df: generates 2 pairs of random movies to play
+    :return: 4 movies
     """
     n = len(movies_df)
     n1 = random.sample(range(n), 4)
@@ -429,29 +448,48 @@ if pager == 'Discover':
     # st.sidebar.image(Image.open('../rawData/pictures/ninjas_versus_puppies.png'))
     st.markdown('Ninjas versus Puppies uses overviews, plot summaries and synopsis to discover relationship between movies.')
     st.sidebar.markdown('Discover allows you to discover relationships between two movies...')
+    st.sidebar.markdown('1) Type the movie you are looking for in the box. Parts of the title are ok!')
+    st.sidebar.markdown('2) See if the movie appears in the selection menu below the box. If yes, select it!')
+    st.sidebar.markdown('3) Repeat for the second movie')
+    st.sidebar.markdown('4) Use the first slider to select the minimum rating that you would like for the results')
+    st.sidebar.markdown('5) You can also increase or decrease the popularity of the movie (more votes, more popular)')
+    st.sidebar.markdown('6) Finally, once you have your results, you can use the last slider to explore which movies are closer the the original ones by sliding to the extremes!')
     st.header('Your selection is:')
 
     # Movie 1 selection
     w1 = st.sidebar.text_input('Choose your first movie!', 'Dune (1984)', key=10)
     res1 = search_similar_title(w1, data_df.title_year, 50)
-    ids1, word1_list = zip(*res1)
-    title1 = st.sidebar.selectbox('Please select:', word1_list, key=11, index=22)
-    movie1 = data_df[data_df['title_year'] == title1]['movieId']
+    try:
+        ids1, word1_list = zip(*res1)
+        title1 = st.sidebar.selectbox('Please select:', word1_list, key=11, index=22)
+        movie1 = data_df[data_df['title_year'] == title1]['movieId']
+    except:
+        word2_list = []
+        st.text('Please, tell me a bit more (maybe a year?)')
+        title1 = st.sidebar.selectbox('Please select:', word2_list, key=11, index=22)
 
     # Movie2 selection
     w2 = st.sidebar.text_input('Choose your second movie!', "Amelie (Fabuleux destin d'Amélie Poulain, Le) (2001)",
                                key=12)
     res2 = search_similar_title(w2, data_df.title_year, 50)
-    ids2, word2_list = zip(*res2)
-    title2 = st.sidebar.selectbox('Please select:', word2_list, key=13, index=5)
-    movie2 = data_df[data_df['title_year'] == title2]['movieId']
+    try:
+        ids2, word2_list = zip(*res2)
+        title2 = st.sidebar.selectbox('Please select:', word2_list, key=13, index=5)
+        movie2 = data_df[data_df['title_year'] == title2]['movieId']
+    except:
+        word2_list = []
+        st.text('Please, tell me a bit more (maybe a year?)')
+        title2 = st.sidebar.selectbox('Please select:', word2_list, key=13, index=5)
 
     # Put original images on the top
     try:
         target_image_list = put_target_images(movie1, movie2)
         st.image(target_image_list, width=200, caption = [movieid_to_title[movie1.iloc[0]],'', movieid_to_title[movie2.iloc[0]]])
+        sim = movie_similarity(model, movieid_to_doctags, [movie1, movie2])
+        print(movieid_to_title[movie1.iloc[0]], ' + ', movieid_to_title[movie2.iloc[0]],'Similarity:', sim)
     except:
-        st.text('Please choose two movies from the left...')
+        st.text('Choose two movies from the left...')
+
 
     min_average = st.sidebar.slider('Min Rating?', min_value=0.0, max_value=10.0, value=5.0, step=0.5, format=None,
                                     key=None)
@@ -471,7 +509,8 @@ if pager == 'Discover':
         res = make_slider_with_filter(model, popular_movies, movieid_to_doctags, movie1, movie2, 2000)
     except:
         res = []
-        st.text('Maybe you need to reduce the minimum vote or the rating...')
+        if len(word1_list) > 0 and len(word2_list) > 0:
+            st.text('Maybe you need to reduce the minimum vote or the rating...')
 
     # If something found...
     if len(res) > 0:
