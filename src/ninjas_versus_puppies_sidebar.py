@@ -429,7 +429,7 @@ def two_random_movies(movies_df):
 
 #Title
 st.title('Ninjas versus Puppies')
-st.markdown("**_A negotiation and discovering tool for movie selection_**")
+st.markdown("**_A fun negotiation tool for movie selection_**")
 
 # load model and data
 model, data_df, titles = load_data()
@@ -447,7 +447,7 @@ if pager == 'Discover':
     # Sidebar
     # st.sidebar.image(Image.open('../rawData/pictures/ninjas_versus_puppies.png'))
     st.markdown('Ninjas versus Puppies uses overviews, plot summaries and synopsis to discover relationship between movies.')
-    st.sidebar.markdown('Discover allows you to discover relationships between two movies...')
+    st.sidebar.markdown('Discover allows you to find relationships between two movies...')
     st.sidebar.markdown('1) Type the movie you are looking for in the box. Parts of the title are ok!')
     st.sidebar.markdown('2) See if the movie appears in the selection menu below the box. If yes, select it!')
     st.sidebar.markdown('3) Repeat for the second movie')
