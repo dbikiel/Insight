@@ -242,16 +242,17 @@ def make_slider_with_filter(model, data_df, movieid_to_doctags, movie_ini, movie
 
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True, show_spinner=False)
-def movie_filter(movies_df, min_votes, min_average):
+def movie_filter(movies_df, minvotes, minaverage):
     """
     Filters the original data frame to
     :param movies_df: original data
-    :param min_votes: minimum votes kept
-    :param min_average: min rating kept
+    :param minvotes: minimum votes kept
+    :param minaverage: min rating kept
     :return: dataframe of movies filtered
     """
-    return movies_df[(movies_df.vote_average >= int(min_average)) & (movies_df.vote_count >= int(min_votes))]
-
+    filtered = movies_df[(movies_df.vote_average >= int(minaverage)) & (movies_df.vote_count >= int(minvotes))]
+    #print(filtered)
+    return filtered
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True, show_spinner=False)
 def search_similar_title(pattern, titles, n_results, threshold=0.4):
@@ -464,9 +465,9 @@ if pager == 'Discover':
         title1 = st.sidebar.selectbox('Please select:', word1_list, key=11, index=22)
         movie1 = data_df[data_df['title_year'] == title1]['movieId']
     except:
-        word2_list = []
+        word1_list = []
         st.text('Please, tell me a bit more (maybe a year?)')
-        title1 = st.sidebar.selectbox('Please select:', word2_list, key=11, index=22)
+        title1 = st.sidebar.selectbox('Please select:', word1_list, key=11, index=22)
 
     # Movie2 selection
     w2 = st.sidebar.text_input('Choose your second movie!', "Amelie (Fabuleux destin d'Amélie Poulain, Le) (2001)",
@@ -489,7 +490,6 @@ if pager == 'Discover':
         print(movieid_to_title[movie1.iloc[0]], ' + ', movieid_to_title[movie2.iloc[0]],'Similarity:', sim)
     except:
         st.text('Choose two movies from the left...')
-
 
     min_average = st.sidebar.slider('Min Rating?', min_value=0.0, max_value=10.0, value=5.0, step=0.5, format=None,
                                     key=None)
